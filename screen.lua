@@ -291,4 +291,10 @@ function MosaicScreen:_updateUndoButton()
     self.undo_button:enableDisable(self.board:canUndo())
 end
 
+-- The solver's per-size shapes are only needed while a game is open: drop
+-- them when the screen closes (the next game rebuilds them in a few ms).
+function MosaicScreen:onCloseWidget()
+    MosaicBoard.release()
+end
+
 return MosaicScreen
