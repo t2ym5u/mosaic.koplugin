@@ -26,6 +26,19 @@ local Solver = {}
 -- once per size, then shared read-only by the models made from it.
 local full_shapes = {}
 
+-- Sizes whose full shape is built (for tests).
+function Solver.cachedSizes()
+    local list = {}
+    for n in pairs(full_shapes) do list[#list + 1] = n end
+    table.sort(list)
+    return list
+end
+
+-- Drops the cached shapes (~0.5-1.5 MB per size; rebuilt in a few ms).
+function Solver.release()
+    full_shapes = {}
+end
+
 local function isFull(clues, n)
     for r = 1, n do
         local row = clues[r]

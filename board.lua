@@ -440,4 +440,9 @@ function MosaicBoard:load(data)
     return true
 end
 
+-- Frees the solver's per-size caches (see Solver.release).
+function MosaicBoard.release()
+    Solver.release()
+end
+
 return MosaicBoard
