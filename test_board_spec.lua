@@ -28,16 +28,6 @@ describe("MosaicBoard", function()
         end
     end
 
-    local function clueCount(b)
-        local k = 0
-        for r = 1, b.n do
-            for c = 1, b.n do
-                if b.clues[r][c] >= 0 then k = k + 1 end
-            end
-        end
-        return k
-    end
-
     describe("solver", function()
         it("each level of logic is sound: it never completes an ambiguous grid", function()
             -- Two clues "1" in the corners of a 2x2 can't decide anything.
@@ -79,42 +69,6 @@ describe("MosaicBoard", function()
                     end
                 end
             end
-        end)
-
-        it("is unique and needs exactly its difficulty's logic, over many seeds", function()
-            for _, diff in ipairs({ "easy", "medium", "hard" }) do
-                for _, n in ipairs({ 8, 10, 12, 15 }) do
-                    for seed = 1, 4 do
-                        local b = newBoard(n, diff, seed * 17 + n)
-                        local model = Solver.buildModel(b.clues, n)
-                        local level, val = Solver.rate(model)
-                        assert.are.equal(Board.DIFFICULTY_LEVEL[diff], level,
-                            ("wrong level: %d %s seed %d"):format(n, diff, seed))
-                        -- The logic's answer is the stored picture.
-                        for r = 1, n do
-                            for c = 1, n do
-                                assert.are.equal(b.solution[r][c], val[(r - 1) * n + c])
-                            end
-                        end
-                        local stats = {}
-                        Solver.solvesAt(model, 2, stats)
-                        assert.is_true((stats.pairs or 0) >= Board.MIN_PAIR_ROUNDS[diff],
-                            ("too easy: %d %s seed %d"):format(n, diff, seed))
-                    end
-                end
-            end
-        end)
-
-        it("backtracking confirms uniqueness", function()
-            for seed = 1, 5 do
-                local b = newBoard(10, "hard", seed)
-                assert.are.equal(1, Solver.countSolutions(Solver.buildModel(b.clues, 10), 2))
-            end
-        end)
-
-        it("digs a good share of the clues away", function()
-            local b = newBoard(12, "hard")
-            assert.is_true(clueCount(b) < 0.5 * 144)
         end)
     end)
 

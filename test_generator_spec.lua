@@ -1,6 +1,5 @@
--- Generator contract: reports progress, and is a pure function of the
--- math.random draws (the Daily Challenge builds the same grid on every
--- device from the same seed, so no clock may steer generation).
+-- Generator contract: reports progress without reading the clock. That a
+-- seed gives the same puzzle lives in test_difficulty_spec.lua.
 local DIR = debug.getinfo(1, "S").source:sub(2):match("(.*[/\\])") or "./"
 
 package.preload["gettext"] = function()
@@ -29,15 +28,6 @@ describe("Mosaic generator", function()
         Board = dofile(DIR .. "board.lua")
     end)
 
-    -- Everything that defines the puzzle, as a string.
-    local function fingerprint(b)
-        local t = { b.n }
-        for r = 1, b.n do
-            for c = 1, b.n do t[#t + 1] = b.clues[r][c] .. "/" .. b.solution[r][c] end
-        end
-        return table.concat(t, ",")
-    end
-
     local function generate(n, diff, seed, on_progress)
         math.randomseed(seed)
         local b = Board:new{ n = n }
@@ -55,15 +45,6 @@ describe("Mosaic generator", function()
                 if k > 1 then assert.is_true(f >= seen[k - 1], diff) end
             end
             assert.are.equal(1, seen[#seen])
-        end
-    end)
-
-    it("builds the same puzzle from the same seed, without reading the clock", function()
-        for _, case in ipairs({ { 8, "easy" }, { 12, "medium" }, { 15, "hard" } }) do
-            local a = fingerprint(generate(case[1], case[2], 2024))
-            local b = fingerprint(generate(case[1], case[2], 2024, function() end))
-            assert.are.equal(a, b)
-            assert.are_not.equal(a, fingerprint(generate(case[1], case[2], 2025)))
         end
     end)
 end)
